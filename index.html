@@ -2,45 +2,152 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حكاوي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق حكاوي</title>
     <style>
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #0d0614, #210d35);
-            color: #fff;
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-        }
-        h1 {
-            color: #e5a93b;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1.2rem;
-            color: #c7a4ff;
-        }
-        .btn {
-            margin-top: 25px;
-            padding: 12px 30px;
-            background: #9d4edd;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #0b0717; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* شريط علوي */
+        .header { background: #160d2b; padding: 16px; text-align: center; font-size: 1.3rem; font-weight: bold; color: #f5b041; border-bottom: 1px solid #2d1b54; position: sticky; top: 0; z-index: 10; }
+        
+        /* الشاشات */
+        .screen { display: none; padding: 16px; flex: 1; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* شاشة الترحيب */
+        .welcome-box { margin: auto; text-align: center; }
+        .welcome-title { font-size: 2rem; color: #f5b041; margin-bottom: 10px; }
+        .welcome-sub { color: #b8a5d6; font-size: 1.1rem; margin-bottom: 30px; }
+        .main-btn { background: linear-gradient(135deg, #8a2be2, #4a00e0); color: white; border: none; padding: 14px 40px; font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); }
+
+        /* قائمة الغرف */
+        .section-title { font-size: 1.2rem; margin-bottom: 15px; color: #d1c4e9; }
+        .room-card { background: #1a1033; border: 1px solid #362263; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .room-info h3 { font-size: 1.1rem; color: #ffffff; margin-bottom: 4px; }
+        .room-info p { font-size: 0.85rem; color: #a594c9; }
+        .join-badge { background: #2e185c; color: #f5b041; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; border: 1px solid #f5b041; }
+
+        /* داخل الغرفة */
+        .room-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { background: #261647; color: #ffffff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: bold; }
+        .seats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .seat { background: #180e30; border: 2px dashed #442a7a; border-radius: 50%; width: 75px; height: 75px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; color: #8e7bb0; cursor: pointer; }
+        .seat.taken { border-style: solid; border-color: #f5b041; color: #f5b041; font-weight: bold; }
+        
+        .chat-box { background: #150c29; border-radius: 12px; padding: 12px; flex: 1; min-height: 150px; margin-bottom: 15px; overflow-y: auto; border: 1px solid #2b1752; font-size: 0.9rem; }
+        .chat-msg { margin-bottom: 8px; }
+        .chat-msg span { color: #f5b041; font-weight: bold; }
+        
+        .room-controls { display: flex; gap: 10px; }
+        .ctrl-btn { flex: 1; padding: 12px; border-radius: 20px; border: none; font-weight: bold; font-size: 0.95rem; cursor: pointer; }
+        .btn-mic { background: #8a2be2; color: white; }
+        .btn-leave { background: #e74c3c; color: white; }
     </style>
 </head>
 <body>
-    <h1>مرحباً بك في حكاوي</h1>
-    <p>غرف صوتية ومرئية ومحادثات ممتعة</p>
-    <button class="btn">دخول الغرف</button>
+
+    <div class="header">حكاوي</div>
+
+    <!-- 1. شاشة البداية -->
+    <div id="screen-welcome" class="screen active">
+        <div class="welcome-box">
+            <h1 class="welcome-title">مرحباً بك في حكاوي</h1>
+            <p class="welcome-sub">غرف صوتية ومجتمع تفاعلي</p>
+            <button class="main-btn" onclick="openScreen('screen-rooms')">دخول الغرف</button>
+        </div>
+    </div>
+
+    <!-- 2. شاشة قائمة الغرف -->
+    <div id="screen-rooms" class="screen">
+        <div class="section-title">الغرف المتاحة الآن:</div>
+        
+        <div class="room-card" onclick="enterRoom('مجلس الأصدقاء')">
+            <div class="room-info">
+                <h3>مجلس الأصدقاء</h3>
+                <p>دردشة عامة وترحيب بالجميع</p>
+            </div>
+            <div class="join-badge">دخول 🎙️</div>
+        </div>
+
+        <div class="room-card" onclick="enterRoom('سهرة حكايات')">
+            <div class="room-info">
+                <h3>سهرة حكايات</h3>
+                <p>قصص وذكريات وموسيقى هادئة</p>
+            </div>
+            <div class="join-badge">دخول 🎙️</div>
+        </div>
+
+        <div class="room-card" onclick="enterRoom('نقاش وتسلية')">
+            <div class="room-info">
+                <h3>نقاش وتسلية</h3>
+                <p>ألعاب ومسابقات صوتية</p>
+            </div>
+            <div class="join-badge">دخول 🎙️</div>
+        </div>
+    </div>
+
+    <!-- 3. شاشة داخل الغرفة -->
+    <div id="screen-room" class="screen">
+        <div class="room-header">
+            <h2 id="current-room-name" style="color: #f5b041; font-size: 1.2rem;">اسم الغرفة</h2>
+            <button class="back-btn" onclick="openScreen('screen-rooms')">خروج للأروقة</button>
+        </div>
+
+        <div class="seats-grid">
+            <div class="seat taken">👑 المضيف</div>
+            <div class="seat" onclick="toggleSeat(this)">مايك 2</div>
+            <div class="seat" onclick="toggleSeat(this)">مايك 3</div>
+            <div class="seat" onclick="toggleSeat(this)">مايك 4</div>
+            <div class="seat" onclick="toggleSeat(this)">مايك 5</div>
+            <div class="seat" onclick="toggleSeat(this)">مايك 6</div>
+        </div>
+
+        <div class="chat-box" id="chat-messages">
+            <div class="chat-msg"><span>النظام:</span> أهلاً بك في الغرفة الصوتية!</div>
+        </div>
+
+        <div class="room-controls">
+            <button class="ctrl-btn btn-mic" id="mic-btn" onclick="toggleMic()">تشغيل المايك 🎤</button>
+            <button class="ctrl-btn btn-leave" onclick="openScreen('screen-rooms')">مغادرة الغرفة</button>
+        </div>
+    </div>
+
+    <script>
+        function openScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function enterRoom(name) {
+            document.getElementById('current-room-name').innerText = name;
+            openScreen('screen-room');
+        }
+
+        function toggleSeat(elem) {
+            if (elem.classList.contains('taken')) {
+                elem.classList.remove('taken');
+                elem.innerText = 'فارغ';
+            } else {
+                elem.classList.add('taken');
+                elem.innerText = 'أنت 🎙️';
+            }
+        }
+
+        let micActive = false;
+        function toggleMic() {
+            micActive = !micActive;
+            const btn = document.getElementById('mic-btn');
+            if (micActive) {
+                btn.innerText = 'كتم الصوت 🔇';
+                btn.style.background = '#f5b041';
+                btn.style.color = '#000';
+            } else {
+                btn.innerText = 'تشغيل المايك 🎤';
+                btn.style.background = '#8a2be2';
+                btn.style.color = '#fff';
+            }
+        }
+    </script>
 </body>
 </html>
